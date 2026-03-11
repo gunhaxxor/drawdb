@@ -1,10 +1,10 @@
 # Stage 1: Build the app
-FROM node:20-alpine AS build
+FROM node:24-alpine AS build
 WORKDIR /app
 COPY package*.json ./
 RUN npm ci
 COPY . .
-ENV NODE_OPTIONS="--max-old-space-size=4096"
+# ENV NODE_OPTIONS="--max-old-space-size=4096"
 RUN npm run build
 
 # Stage 2: Setup the Nginx Server to serve the app
