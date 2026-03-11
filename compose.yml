@@ -1,16 +1,31 @@
 services:
-  drawdb:
-    image: node:20-alpine
-    container_name: drawdb
+  caddy:
+    image: lucaslorentz/caddy-docker-proxy:ci-alpine
     ports:
-      - 5173:5173
-    working_dir: /var/www/html
+      - 80:80
     volumes:
-      - ./:/var/www/html
-    command: sh -c "npm install && npm run dev -- --host"
+      - /var/run/docker.sock:/var/run/docker.sock
+      - caddy_data:/data
     networks:
-      - default
+      - caddy
+    restart: unless-stopped
+  drawdb:
+    build: .
+    container_name: drawdb
+    expose:
+      - 4582
+    labels: 
+      caddy: "http://drawdb.localhost"
+      caddy.reverse_proxy: "{{upstreams 4582}}"
+      caddy.basic_auth: /*
+      caddy.basic_auth.admin: "$2y$05$7rdEwDLvUgt9H7dAU1UKI.W9DkHX/6G.S2xKjduQg2yNNv.inUfsO"
+    networks:
+      - caddy
 
+  
 networks:
-  default:
-    driver: bridge
+  caddy:
+
+volumes:
+  caddy_data:
+  caddy_config:
